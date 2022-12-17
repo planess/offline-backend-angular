@@ -13,6 +13,12 @@
     "downlevelIteration": true,
     "experimentalDecorators": true,
     "moduleResolution": "node",
+    "paths": {
+      "offline-network": [
+        "dist/offline-network/offline-network",
+        "dist/offline-network"
+      ]
+    },
     "importHelpers": true,
     "target": "es2017",
     "module": "es2020",
