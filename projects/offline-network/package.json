@@ -1,9 +1,10 @@
 {
-	"name": "offline-network",
+	"name": "@planess/offline-network",
 	"version": "0.0.1",
 	"peerDependencies": {
 		"@angular/common": "^12.2.0",
-		"@angular/core": "^12.2.0"
+		"@angular/core": "^12.2.0",
+		"rxjs": "~6.6.0"
 	},
 	"dependencies": {
 		"tslib": "^2.3.0"

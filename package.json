@@ -5,6 +5,7 @@
 		"ng": "ng",
 		"start": "ng serve",
 		"build": "ng build",
+		"build:prod": "ng build --configuration=production",
 		"lint": "npm run lint:syntax && npm run lint:format",
 		"lint:syntax": "eslint ./projects --config .eslintrc.yml",
 		"lint:format": "prettier --check ./projects",
