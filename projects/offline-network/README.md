@@ -1,25 +1,67 @@
-# OfflineNetwork
+# Overview
 
-This library was generated with [Angular CLI](https://github.com/angular/angular-cli) version 12.2.0.
+This package helps to keep active development if internet connection is out for short time.
 
-## Code scaffolding
+How it works: system collects all http-request when connection is on and use the last obtained
+results replacing the real htt-requests by saved copies when internet connection it off.
 
-Run `ng generate component component-name --project offline-network` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module --project offline-network`.
+# Setup
 
-> Note: Don't forget to add `--project offline-network` or else it will be added to the default project in your `angular.json` file.
+### Install the package
 
-## Build
+Run the command in your project:
 
-Run `ng build offline-network` to build the project. The build artifacts will be stored in the `dist/` directory.
+```shell
+npm install @planess/offline-network
+```
 
-## Publishing
+### Invoke provider factory in NgModule
 
-After building your library with `ng build offline-network`, go to the dist folder `cd dist/offline-network` and run `npm publish`.
+Append execution of special `configureOfflineNetwork` into main module provider (usually,
+in `app.module.ts`):
 
-## Running unit tests
+```typescript
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { configureOfflineNetwork } from '@planess/offline-network';
+import { environment } from 'src/environments/environment';
 
-Run `ng test offline-network` to execute the unit tests via [Karma](https://karma-runner.github.io).
+@NgModule({
+	providers: [configureOfflineNetwork(HTTP_INTERCEPTORS, { maxAge: 60 }, environment.production)],
+})
+export class AppModule {}
+```
 
-## Further help
+Syntax is:
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+```typescript
+function configureOfflineNetwork(
+	HTTP_INTERCEPTORS_FROM_THE_APP: typeof HTTP_INTERCEPTORS,
+	configuration?: Partial<Configuration>,
+	productionMode: boolean,
+): Provider[];
+```
+
+, arguments:
+
+- `HTTP_INTERCEPTORS_FROM_THE_APP` - original `HTTP_INTERCEPTORS` project's token for http-requests;
+- `configuration` - _optional_ set of parameters. Details are below;
+- `productionMode` - whether application is running in production mode. Module is disabled for
+  production version.
+
+# Configuration
+
+You can pass `configuration` as a second argument with any number of properties with `Configuration`
+interface:
+
+- `maxAge`: `number = 48` - number of **hours** while cache is available
+- `includeServerOff`: `boolean = false` - either server's 500 errors would use the cache. `true` -
+  use cache!
+
+# Changelogs
+
+[Read the last changes](./CHANGELOG.md) if you need to upgrade package version.
+
+# Want to help?
+
+We would be grateful for any remarks, fix, comments, suggestions or contribution. You
+can [fork the project](https://github.com/planess/offline-network-angular) and make helpful changes.
