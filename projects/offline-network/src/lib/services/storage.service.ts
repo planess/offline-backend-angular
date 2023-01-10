@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 
-import { StorageApi } from '../api';
+import { StorageApi, StorageData } from '../api';
 
 import { IndexedDbStorageService } from './indexed-db-storage.service';
 import { LogService } from './log.service';
@@ -17,10 +17,9 @@ export abstract class StorageService implements StorageApi, OnDestroy {
 
 	abstract ngOnDestroy(): void;
 
-	abstract retrieve<T extends string | object>(key: string): Promise<T | null>;
+	abstract retrieve<T>(key: string): Promise<StorageData<T> | null>;
 
-	abstract persist<T extends string | number | object | null>(
-		key: string,
-		data: T,
-	): Promise<boolean>;
+	abstract persist<R>(key: string, data: R): Promise<void>;
+
+	abstract delete(key: string): Promise<void>;
 }
