@@ -2,8 +2,9 @@
 
 This package helps to keep active development if internet connection is out for short time.
 
-How it works: system collects all http-request when connection is on and use the last obtained
-results replacing the real htt-requests by saved copies when internet connection it off.
+How it works: system collects all http-request when connection is on and use the
+**last successfully** obtained results replacing the real htt-requests by saved copies when
+internet connection it off.
 
 # Setup
 
@@ -57,6 +58,14 @@ interface:
 - `includeServerOff`: `boolean = false` - either server's 500 errors would use the cache. `true` -
   use cache!
 
+# Troubleshooting
+
+#### _Everytime an error "Cache for {key} key is broken!" occurs in browser console_
+
+Most likely DB data is corrupted for some reason.
+Clear the storage: open browser inspector - tab "Application" - expand IndexedDB storage - delete
+"offline-network-db" database and refresh page.
+
 # Changelogs
 
 [Read the last changes](./CHANGELOG.md) if you need to upgrade package version.
@@ -65,3 +74,6 @@ interface:
 
 We would be grateful for any remarks, fix, comments, suggestions or contribution. You
 can [fork the project](https://github.com/planess/offline-network-angular) and make helpful changes.
+
+Another way is to send email to [planess.group@protonmail.com](mailto:planess.group@protonmail.com)
+with your idea and contacts.
