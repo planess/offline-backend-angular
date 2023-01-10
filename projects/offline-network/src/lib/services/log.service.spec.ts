@@ -21,4 +21,12 @@ describe('LogService', () => {
 
 		expect(warn).toHaveBeenCalledOnceWith('Offline Network: text');
 	});
+
+	it('should write error', () => {
+		const error = spyOn(console, 'error');
+
+		service.alarm('text');
+
+		expect(error).toHaveBeenCalledOnceWith('Offline Network: text');
+	});
 });

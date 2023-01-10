@@ -7,6 +7,7 @@ import { Configuration } from '../api';
 import { generateHttpRequestKey } from '../helpers';
 import { CONFIGURATION } from '../tokens';
 
+import { LogService } from './log.service';
 import { StorageService } from './storage.service';
 
 @Injectable({
@@ -16,20 +17,24 @@ export class OfflineNetworkService {
 	constructor(
 		@Inject(CONFIGURATION) private readonly configuration: Configuration,
 		private readonly storage: StorageService,
+		private readonly log: LogService,
 	) {}
 
-	collectResponse<T, R>(request: HttpRequest<T>, event: HttpEvent<R>): void {
+	async collectResponse<T, R>(request: HttpRequest<T>, event: HttpEvent<R>): Promise<void> {
 		if (event instanceof HttpResponse) {
-			this.persist(request, event).then(() => {
-				console.warn(`Offline Network: Original request ${request.urlWithParams} saved.`);
+			return this.persist(request, event).then(() => {
+				this.log.write(`Original request ${request.urlWithParams} saved.`);
 			});
 		}
 	}
 
 	handleError<T, R>(request: HttpRequest<T>, err: HttpErrorResponse): Observable<HttpResponse<R>> {
-		if (!navigator.onLine && err.status === 0) {
-			// connection is lost
-			return from(this.retrieve<T>(request)).pipe(
+		if (
+			(!navigator.onLine && err.status === 0) ||
+			(this.configuration.includeServerOff && Math.floor(err.status / 100) === 5)
+		) {
+			// connection is lost or server is down
+			return from(this.retrieve<T, R>(request)).pipe(
 				map((result) => {
 					if (result) {
 						return new HttpResponse<R>(result);
@@ -38,8 +43,8 @@ export class OfflineNetworkService {
 					throw err;
 				}),
 				tap(() => {
-					console.warn(
-						`Offline Network: Original request to ${request.urlWithParams} replaced with static cache!`,
+					this.log.write(
+						`Original request to ${request.urlWithParams} replaced with static cache!`,
 					);
 				}),
 			);
@@ -49,15 +54,33 @@ export class OfflineNetworkService {
 		return throwError(err);
 	}
 
-	protected persist<T, R>(request: HttpRequest<T>, response: HttpResponse<R>): Promise<boolean> {
+	protected persist<T, R>(request: HttpRequest<T>, response: HttpResponse<R>): Promise<void> {
 		const key = generateHttpRequestKey(request);
 
 		return this.storage.persist(key, response);
 	}
 
-	protected retrieve<T>(request: HttpRequest<T>): Promise<object | null> {
+	protected async retrieve<T, R>(request: HttpRequest<T>): Promise<R | null> {
 		const key = generateHttpRequestKey(request);
+		const data = await this.storage.retrieve<R>(key);
 
-		return this.storage.retrieve(key);
+		if (!data) {
+			return null;
+		}
+
+		const { value, updatedAt } = data;
+
+		if (this.configuration.maxAge > 0) {
+			const milliseconds = this.configuration.maxAge * 60 * 60 * 1000;
+
+			if (new Date().getTime() - updatedAt > milliseconds) {
+				// cache is out, delete it
+				await this.storage.delete(key);
+
+				return null;
+			}
+		}
+
+		return value;
 	}
 }

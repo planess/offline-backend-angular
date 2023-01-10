@@ -1,99 +1,117 @@
-import { Inject, Injectable } from '@angular/core';
-import { ReplaySubject, Subject } from 'rxjs';
-import { finalize, first, map, switchMap, takeUntil } from 'rxjs/operators';
+import { Inject, Injectable, OnDestroy } from '@angular/core';
+import { from, of, ReplaySubject, Subject } from 'rxjs';
+import { finalize, first, switchMap, takeUntil } from 'rxjs/operators';
 
-import { StorageApi } from '../api';
+import { StorageApi, StorageData } from '../api';
 import { dbObjectStore } from '../config';
 import { DB_NAME, DB_VERSION } from '../tokens';
+
+import { LogService } from './log.service';
 
 @Injectable({
 	providedIn: 'root',
 })
-export class IndexedDbStorageService implements StorageApi {
+export class IndexedDbStorageService implements StorageApi, OnDestroy {
 	protected db$ = new ReplaySubject<IDBDatabase>(1);
 	protected dbClose$ = new Subject<void>();
 
 	constructor(
 		@Inject(DB_NAME) private readonly db_name: string,
 		@Inject(DB_VERSION) private readonly db_version: number,
+		private readonly logService: LogService,
 	) {
 		this.init();
 	}
 
-	retrieve<T>(key: string): Promise<T | null> {
+	delete(key: string): Promise<void> {
 		return this.db$
 			.pipe(
 				first<IDBDatabase>(Boolean),
-				switchMap((db) => {
-					return new Promise<T | null>((resolve, reject) => {
-						const request = db.transaction([dbObjectStore]).objectStore(dbObjectStore).get(key);
+				switchMap(
+					(db) =>
+						new Promise<void>((resolve, reject) => {
+							const request = db
+								.transaction([dbObjectStore])
+								.objectStore(dbObjectStore)
+								.delete(key);
 
-						request.onerror = reject;
-						request.onsuccess = () => {
-							const data = request.result?.data ?? null;
+							request.onerror = reject;
+							request.onsuccess = () => resolve();
+						}),
+				),
+			)
+			.toPromise();
+	}
 
-							resolve(data);
-						};
-					});
-				}),
-				map((data) => {
-					let d;
+	retrieve<T>(key: string): Promise<StorageData<T> | null> {
+		return this.db$
+			.pipe(
+				first<IDBDatabase>(Boolean),
+				switchMap(
+					(db) =>
+						new Promise<StorageData<string>>((resolve, reject) => {
+							const request = db.transaction([dbObjectStore]).objectStore(dbObjectStore).get(key);
 
+							request.onerror = reject;
+							request.onsuccess = () => {
+								resolve(request.result ?? null);
+							};
+						}),
+				),
+				switchMap((data) => {
 					if (data) {
-						if (typeof data === 'string') {
-							try {
-								d = JSON.parse(data);
-							} catch {
-								d = data;
-							}
+						try {
+							const value = JSON.parse(data.value);
+
+							return of({ ...data, value });
+						} catch {
+							// cache is broken for some reason
+							this.logService.alarm(`Cache for ${key} key is broken!`);
+
+							return this.delete(key).then(() => null);
 						}
-					} else {
-						d = data ?? null;
 					}
 
-					return d;
+					return of(null);
 				}),
 			)
 			.toPromise();
 	}
 
-	persist<T>(key: string, data: T): Promise<boolean> {
+	persist<T>(key: string, data: T): Promise<void> {
+		if (!data) {
+			return this.delete(key);
+		}
+
 		return this.db$
 			.pipe(
 				first<IDBDatabase>(Boolean),
-				switchMap((db) => {
-					return new Promise<boolean>((resolve, reject) => {
-						let d: string;
+				switchMap((db) =>
+					from(this.retrieve(key)).pipe(
+						switchMap((value) => {
+							const createdAt = new Date().getTime();
+							const updatedAt = new Date().getTime();
+							const transaction = db.transaction([dbObjectStore], 'readwrite');
 
-						switch (typeof data) {
-						case 'string':
-							d = data;
-							break;
-						case 'number':
-							d = `${data}`;
-							break;
-						case 'object':
-							d = JSON.stringify(data);
-							break;
-						default:
-							throw new Error('Some wrong data');
-						}
+							return new Promise<void>((resolve, reject) => {
+								const serializedData = JSON.stringify(data);
 
-						const transaction = db.transaction(dbObjectStore, 'readwrite');
-						const request = transaction.objectStore(dbObjectStore).put({ key, data: d });
+								let storageData: StorageData<string>;
 
-						request.onerror = (err) => {
-							console.log('-add error', err);
-						};
+								if (value) {
+									storageData = { ...value, updatedAt, value: serializedData };
+								} else {
+									storageData = { createdAt, updatedAt, value: serializedData, key };
+								}
 
-						transaction.oncomplete = () => {
-							resolve(true);
-						};
-						transaction.onerror = () => {
-							resolve(false);
-						};
-					});
-				}),
+								transaction.onerror = reject;
+								transaction.oncomplete = () => resolve();
+
+								transaction.objectStore(dbObjectStore).put(storageData);
+							});
+						}),
+					),
+				),
 			)
 			.toPromise();
 	}
@@ -106,12 +124,10 @@ export class IndexedDbStorageService implements StorageApi {
 		const openDBRequest = indexedDB.open(this.db_name, this.db_version);
 		let db: IDBDatabase;
 
-		openDBRequest.onerror = (event) => {
-			console.error('IndexedDB is unavailable for some reason!');
-
-			this.db$.complete();
+		openDBRequest.onerror = (ev) => {
+			this.db$.error(ev);
 		};
-		openDBRequest.onsuccess = (event) => {
+		openDBRequest.onsuccess = () => {
 			db = openDBRequest.result;
 
 			this.db$.next(openDBRequest.result);
@@ -119,7 +135,9 @@ export class IndexedDbStorageService implements StorageApi {
 		openDBRequest.onupgradeneeded = (event) => {
 			const db = (event.target as IDBOpenDBRequest).result;
 
-			db.createObjectStore(dbObjectStore, { keyPath: 'key' });
+			const objectStore = db.createObjectStore(dbObjectStore, { keyPath: 'key' });
+			objectStore.createIndex('createdAt', 'createdAt', { unique: false });
+			objectStore.createIndex('updatedAt', 'updatedAt', { unique: false });
 		};
 
 		this.db$
@@ -129,6 +147,10 @@ export class IndexedDbStorageService implements StorageApi {
 					db?.close();
 				}),
 			)
-			.subscribe();
+			.subscribe({
+				error: (ev) => {
+					this.logService.alarm(`IndexedDB is unavailable for some reason: ${ev}`);
+				},
+			});
 	}
 }

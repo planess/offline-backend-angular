@@ -4,7 +4,7 @@ import { Configuration } from './api';
 import { defaultConfiguration } from './config';
 import { configureOfflineNetwork } from './configure-offline-network';
 import { OfflineInterceptor } from './interceptors';
-import { StorageService } from './services';
+import { LogService, StorageService } from './services';
 import { CONFIGURATION, DB_NAME, DB_VERSION } from './tokens';
 
 import arrayWithExactContents = jasmine.arrayWithExactContents;
@@ -34,7 +34,11 @@ describe('configureOfflineNetwork', () => {
 				{ provide: CONFIGURATION, useValue: configuration },
 				{ provide: DB_VERSION, useValue: any(Number) },
 				{ provide: DB_NAME, useValue: any(String) },
-				{ provide: StorageService, useFactory: any(Function), deps: [DB_NAME, DB_VERSION] },
+				{
+					provide: StorageService,
+					useFactory: any(Function),
+					deps: [DB_NAME, DB_VERSION, LogService],
+				},
 				{ provide: token, multi: true, useClass: OfflineInterceptor },
 			];
 
@@ -54,7 +58,11 @@ describe('configureOfflineNetwork', () => {
 				{ provide: CONFIGURATION, useValue: configuration },
 				{ provide: DB_VERSION, useValue: any(Number) },
 				{ provide: DB_NAME, useValue: any(String) },
-				{ provide: StorageService, useFactory: any(Function), deps: [DB_NAME, DB_VERSION] },
+				{
+					provide: StorageService,
+					useFactory: any(Function),
+					deps: [DB_NAME, DB_VERSION, LogService],
+				},
 				{ provide: token, multi: true, useClass: OfflineInterceptor },
 			];
 

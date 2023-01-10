@@ -84,7 +84,11 @@ export function configureOfflineNetwork(
 		{ provide: CONFIGURATION, useValue: configuration },
 		{ provide: DB_VERSION, useValue: 1 },
 		{ provide: DB_NAME, useValue: 'offline-network-db' },
-		{ provide: StorageService, useFactory: storageServiceFactory, deps: [DB_NAME, DB_VERSION] },
+		{
+			provide: StorageService,
+			useFactory: storageServiceFactory,
+			deps: [DB_NAME, DB_VERSION, LogService],
+		},
 		{
 			provide: HTTP_INTERCEPTORS_FROM_THE_APP,
 			multi: true,
