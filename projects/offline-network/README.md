@@ -2,9 +2,26 @@
 
 This package helps to keep active development if internet connection is out for short time.
 
-How it works: system collects all http-request when connection is on and use the
-**last successfully** obtained results replacing the real htt-requests by saved copies when
+> This module is used only in **development** running!
+
+### How it works:
+
+Module collects all http-request via **HttpClient** when connection is on and use the
+**last** successfully performed results replacing the real http-requests by saved copies when
 internet connection it off.
+
+> HTTP-request **headers** have **no impact** on the cache and are not considered in processing at
+> all.
+
+The presence or absence of any headers will not affect the result of saving requests and response.
+However, if you have some additional specific interceptors/processing of http-requests it can
+make some conflicts.
+
+# Limitations
+
+- Minimal Angular version - 12;
+- All data are saved in browser storage with **IndexedDB** (or Local Storage for the second
+  priority). In the browser private tab it exists until browser is closed.
 
 # Setup
 
@@ -54,9 +71,32 @@ function configureOfflineNetwork(
 You can pass `configuration` as a second argument with any number of properties with `Configuration`
 interface:
 
-- `maxAge`: `number = 48` - number of **hours** while cache is available
+- `maxAge`: `number = 48` - number of **hours** while cache is available;
 - `includeServerOff`: `boolean = false` - either server's 500 errors would use the cache. `true` -
   use cache!
+
+# Example
+
+1. After successful integration this package with the target project and run it in **development**
+   mode you will see a message in _browser console_:
+
+![Offline service is running](./docs/images/2023-01-11_20h33_13.png)
+
+2. When connection is on all your successful XHR request via **HttpClient** service is tracked and
+   responses are collected:
+
+![Request collecting](./docs/images/2023-01-11_21h35_13.png)
+
+3. If connection is off you will get saved copy of **last** successful response:
+
+![Getting cache](./docs/images/2023-01-11_21h41_34.png)
+
+Be aware, the http-request remains **failed** in any case:
+
+![Failed http-request](./docs/images/2023-01-11_22h06_13.png)
+
+4. A common http error is thrown if cache does not exist. You can catch and handle error by your
+   own.
 
 # Troubleshooting
 
@@ -64,7 +104,7 @@ interface:
 
 Most likely DB data is corrupted for some reason.
 Clear the storage: open browser inspector - tab "Application" - expand IndexedDB storage - delete
-"offline-network-db" database and refresh page.
+"offline-network-db" database and refresh the page.
 
 # Changelogs
 
