@@ -13,7 +13,7 @@
       "prefix": "pl",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "builder": "@angular-devkit/build-ng-packagr:build",
           "options": {
             "project": "projects/offline-network/ng-package.json"
           },

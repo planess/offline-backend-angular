@@ -80,20 +80,20 @@ interface:
 1. After successful integration this package with the target project and run it in **development**
    mode you will see a message in _browser console_:
 
-![Offline service is running](./docs/images/2023-01-11_20h33_13.png)
+![Offline service is running](docs/images/2023-01-11_20h33_13.png)
 
 2. When connection is on all your successful XHR request via **HttpClient** service is tracked and
    responses are collected:
 
-![Request collecting](./docs/images/2023-01-11_21h35_13.png)
+![Request collecting](docs/images/2023-01-11_21h35_13.png)
 
 3. If connection is off you will get saved copy of **last** successful response:
 
-![Getting cache](./docs/images/2023-01-11_21h41_34.png)
+![Getting cache](docs/images/2023-01-11_21h41_34.png)
 
 Be aware, the http-request remains **failed** in any case:
 
-![Failed http-request](./docs/images/2023-01-11_22h06_13.png)
+![Failed http-request](docs/images/2023-01-11_22h06_13.png)
 
 4. A common http error is thrown if cache does not exist. You can catch and handle error by your
    own.
@@ -116,4 +116,4 @@ We would be grateful for any remarks, fix, comments, suggestions or contribution
 can [fork the project](https://github.com/planess/offline-network-angular) and make helpful changes.
 
 Another way is to send email to [planess.group@protonmail.com](mailto:planess.group@protonmail.com)
-with your idea and contacts.
+with your idea and contacts for communication.
