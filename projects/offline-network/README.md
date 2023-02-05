@@ -2,13 +2,13 @@
 
 This package helps to keep active development if internet connection is out for short time.
 
-> This module is used only in **development** running!
+> This module runs only in **development** app mode.
 
 ### How it works:
 
-Module collects all http-request via **HttpClient** when connection is on and use the
+Module collects all http-request via original **HttpClient** when connection is on and use the
 **last** successfully performed results replacing the real http-requests by saved copies when
-internet connection it off.
+internet connection is off.
 
 > HTTP-request **headers** have **no impact** on the cache and are not considered in processing at
 > all.
@@ -19,9 +19,14 @@ make some conflicts.
 
 # Limitations
 
-- Minimal Angular version - 12;
+- Each `HttpClientModule` import in `NgModule` brings in new instance of `HttpClient` with dedicated
+  interceptors. Usually, it happens only once in root module, but you should set
+  `configureOfflineNetwork` in every provider along with `HttpClientModule` import.
+- Based on point above - module **will not** catch any http-request performed by
+  installed third-party packages.
 - All data are saved in browser storage with **IndexedDB** (or Local Storage for the second
-  priority). In the browser private tab it exists until browser is closed.
+  priority). In the browser private tab it exists until browser is closed. And you cannot
+  move data to another browser manually.
 
 # Setup
 
