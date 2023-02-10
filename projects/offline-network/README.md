@@ -19,6 +19,7 @@ make some conflicts.
 
 # Limitations
 
+- Minimal Angular version - 9.
 - Each `HttpClientModule` import in `NgModule` brings in new instance of `HttpClient` with dedicated
   interceptors. Usually, it happens only once in root module, but you should set
   `configureOfflineNetwork` in every provider along with `HttpClientModule` import.

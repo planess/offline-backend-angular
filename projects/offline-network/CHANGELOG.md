@@ -1,7 +1,8 @@
-# 0.1.0 (01/??/2023)
+# 0.1.0 (02/10/2023)
 
 ### Angular
 
+- set minimal project Angular version for **9**.
 - added second/third parameter `productionMode` to exported `configureOfflineNetwork` function in
   order to keep module enabled only for development;
 - marked `configuration` as optional argument for `configureOfflineNetwork` function;

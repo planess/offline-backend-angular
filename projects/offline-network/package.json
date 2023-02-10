@@ -2,7 +2,7 @@
 	"name": "@planess/offline-network",
 	"author": "Planess group",
 	"license": "ISC",
-	"version": "9.0.0",
+	"version": "0.1.0",
 	"peerDependencies": {
 		"@angular/common": "^9.0.0",
 		"@angular/core": "^9.0.0",
