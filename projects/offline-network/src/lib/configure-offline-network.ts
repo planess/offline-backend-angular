@@ -69,7 +69,7 @@ export function configureOfflineNetwork(
 ): Provider[] {
 	if (typeof configuration === 'boolean') {
 		productionMode = configuration;
-		configuration = undefined;
+		configuration = {};
 	}
 
 	if (productionMode) {
@@ -78,7 +78,7 @@ export function configureOfflineNetwork(
 
 	LogService.write('Service is running!');
 
-	configuration = { ...defaultConfiguration, ...(configuration ?? {}) };
+	configuration = { ...defaultConfiguration, ...configuration };
 
 	return [
 		{ provide: CONFIGURATION, useValue: configuration },
