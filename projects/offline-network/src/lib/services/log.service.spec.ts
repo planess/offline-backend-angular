@@ -19,7 +19,8 @@ describe('LogService', () => {
 
 		service.write('text');
 
-		expect(warn).toHaveBeenCalledOnceWith('Offline Network: text');
+		expect(warn).toHaveBeenCalledTimes(1);
+		expect(warn).toHaveBeenCalledWith('Offline Network: text');
 	});
 
 	it('should write error', () => {
@@ -27,6 +28,7 @@ describe('LogService', () => {
 
 		service.alarm('text');
 
-		expect(error).toHaveBeenCalledOnceWith('Offline Network: text');
+		expect(error).toHaveBeenCalledTimes(1);
+		expect(error).toHaveBeenCalledWith('Offline Network: text');
 	});
 });

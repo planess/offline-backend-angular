@@ -79,10 +79,10 @@ describe('OfflineNetworkService', () => {
 			const result = service.collectResponse(request, event);
 
 			await expectAsync(result).toBeResolved();
-			expect(storageService.persist).toHaveBeenCalledOnceWith(key, event);
-			expect(logService.write).toHaveBeenCalledOnceWith(
-				stringMatching(/^Original request .+ saved.$/),
-			);
+			expect(storageService.persist).toHaveBeenCalledTimes(1);
+			expect(logService.write).toHaveBeenCalledTimes(1);
+			expect(storageService.persist).toHaveBeenCalledWith(key, event);
+			expect(logService.write).toHaveBeenCalledWith(stringMatching(/^Original request .+ saved.$/));
 		});
 
 		it('should reject', async () => {
@@ -93,7 +93,8 @@ describe('OfflineNetworkService', () => {
 			const result = service.collectResponse(request, event);
 
 			await expectAsync(result).toBeRejected();
-			expect(storageService.persist).toHaveBeenCalledOnceWith(key, event);
+			expect(storageService.persist).toHaveBeenCalledTimes(1);
+			expect(storageService.persist).toHaveBeenCalledWith(key, event);
 			expect(logService.write).not.toHaveBeenCalled();
 		});
 	});
@@ -179,7 +180,8 @@ describe('OfflineNetworkService', () => {
 					error: (error) => {
 						expect(error).toBe(err);
 						expect(storageService.delete).not.toHaveBeenCalled();
-						expect(storageService.retrieve).toHaveBeenCalledOnceWith(key);
+						expect(storageService.retrieve).toHaveBeenCalledTimes(1);
+						expect(storageService.retrieve).toHaveBeenCalledWith(key);
 
 						done();
 					},
@@ -204,8 +206,10 @@ describe('OfflineNetworkService', () => {
 					next: () => fail(),
 					error: (error) => {
 						expect(error).toBe(err);
-						expect(storageService.delete).toHaveBeenCalledOnceWith(key);
-						expect(storageService.retrieve).toHaveBeenCalledOnceWith(key);
+						expect(storageService.delete).toHaveBeenCalledTimes(1);
+						expect(storageService.delete).toHaveBeenCalledWith(key);
+						expect(storageService.retrieve).toHaveBeenCalledTimes(1);
+						expect(storageService.retrieve).toHaveBeenCalledWith(key);
 
 						done();
 					},
@@ -244,10 +248,12 @@ describe('OfflineNetworkService', () => {
 					next: (data) => expect(data).toEqual(expectedValue),
 					error: () => fail(),
 					complete: () => {
-						expect(logService.write).toHaveBeenCalledOnceWith(
+						expect(logService.write).toHaveBeenCalledTimes(1);
+						expect(logService.write).toHaveBeenCalledWith(
 							stringMatching(/^Original request to .+ replaced with static cache!$/),
 						);
-						expect(storageService.retrieve).toHaveBeenCalledOnceWith(key);
+						expect(storageService.retrieve).toHaveBeenCalledTimes(1);
+						expect(storageService.retrieve).toHaveBeenCalledWith(key);
 						expect(storageService.delete).not.toHaveBeenCalled();
 
 						done();
@@ -266,10 +272,12 @@ describe('OfflineNetworkService', () => {
 					next: (data) => expect(data).toEqual(expectedValue),
 					error: () => fail(),
 					complete: () => {
-						expect(logService.write).toHaveBeenCalledOnceWith(
+						expect(logService.write).toHaveBeenCalledTimes(1);
+						expect(logService.write).toHaveBeenCalledWith(
 							stringMatching(/^Original request to .+ replaced with static cache!$/),
 						);
-						expect(storageService.retrieve).toHaveBeenCalledOnceWith(key);
+						expect(storageService.retrieve).toHaveBeenCalledTimes(1);
+						expect(storageService.retrieve).toHaveBeenCalledWith(key);
 						expect(storageService.delete).not.toHaveBeenCalled();
 
 						done();

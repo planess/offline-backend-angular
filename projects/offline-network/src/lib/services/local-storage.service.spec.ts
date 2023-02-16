@@ -44,7 +44,8 @@ describe('LocalStorageService', () => {
 		const result = service.delete(key);
 
 		await expectAsync(result).toBeResolvedTo(undefined);
-		expect(remoteItem).toHaveBeenCalledOnceWith(`${dbName}.${dbVersion}.${key}`);
+		expect(remoteItem).toHaveBeenCalledTimes(1);
+		expect(remoteItem).toHaveBeenCalledWith(`${dbName}.${dbVersion}.${key}`);
 	});
 
 	describe('retrieve', () => {
@@ -63,7 +64,8 @@ describe('LocalStorageService', () => {
 			const result = service.retrieve(key);
 
 			await expectAsync(result).toBeResolvedTo(null);
-			expect(getItem).toHaveBeenCalledOnceWith(storageKey);
+			expect(getItem).toHaveBeenCalledTimes(1);
+			expect(getItem).toHaveBeenCalledWith(storageKey);
 		});
 
 		it('should get correct data', async () => {
@@ -75,7 +77,8 @@ describe('LocalStorageService', () => {
 			const result = service.retrieve(key);
 
 			await expectAsync(result).toBeResolvedTo(data);
-			expect(getItem).toHaveBeenCalledOnceWith(storageKey);
+			expect(getItem).toHaveBeenCalledTimes(1);
+			expect(getItem).toHaveBeenCalledWith(storageKey);
 		});
 
 		it('should get NULL due to wrong data', async () => {
@@ -86,9 +89,12 @@ describe('LocalStorageService', () => {
 			const result = service.retrieve(key);
 
 			await expectAsync(result).toBeResolvedTo(null);
-			expect(getItem).toHaveBeenCalledOnceWith(storageKey);
-			expect(deleteMethod).toHaveBeenCalledOnceWith(key);
-			expect(logService.alarm).toHaveBeenCalledOnceWith(
+			expect(getItem).toHaveBeenCalledTimes(1);
+			expect(getItem).toHaveBeenCalledWith(storageKey);
+			expect(deleteMethod).toHaveBeenCalledTimes(1);
+			expect(deleteMethod).toHaveBeenCalledWith(key);
+			expect(logService.alarm).toHaveBeenCalledTimes(1);
+			expect(logService.alarm).toHaveBeenCalledWith(
 				stringMatching(/^Cache for .+ key is broken!$/),
 			);
 		});
@@ -117,7 +123,8 @@ describe('LocalStorageService', () => {
 			const result = service.persist(key, null);
 
 			await expectAsync(result).toBeResolvedTo(undefined);
-			expect(deleteMethod).toHaveBeenCalledOnceWith(key);
+			expect(deleteMethod).toHaveBeenCalledTimes(1);
+			expect(deleteMethod).toHaveBeenCalledWith(key);
 		});
 
 		it('should throw an error', async () => {
@@ -146,7 +153,8 @@ describe('LocalStorageService', () => {
 			const result = service.persist(key, data);
 
 			await expectAsync(result).toBeResolvedTo(undefined);
-			expect(setItem).toHaveBeenCalledOnceWith(storageKey, value);
+			expect(setItem).toHaveBeenCalledTimes(1);
+			expect(setItem).toHaveBeenCalledWith(storageKey, value);
 			expect(deleteMethod).not.toHaveBeenCalled();
 		});
 
@@ -171,7 +179,8 @@ describe('LocalStorageService', () => {
 			const result = service.persist(key, data);
 
 			await expectAsync(result).toBeResolvedTo(undefined);
-			expect(setItem).toHaveBeenCalledOnceWith(storageKey, value);
+			expect(setItem).toHaveBeenCalledTimes(1);
+			expect(setItem).toHaveBeenCalledWith(storageKey, value);
 			expect(deleteMethod).not.toHaveBeenCalled();
 		});
 	});

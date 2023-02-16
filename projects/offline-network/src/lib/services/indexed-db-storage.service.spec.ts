@@ -75,7 +75,8 @@ describe('IndexedDbStorageService', () => {
 	it('should break on initialization', () => {
 		openDBRequest?.onerror?.(new Event(''));
 
-		expect(logService.alarm).toHaveBeenCalledOnceWith(
+		expect(logService.alarm).toHaveBeenCalledTimes(1);
+		expect(logService.alarm).toHaveBeenCalledWith(
 			stringMatching(/^IndexedDB is unavailable for some reason:/),
 		);
 	});
@@ -95,9 +96,12 @@ describe('IndexedDbStorageService', () => {
 		const result = service.delete(key);
 
 		await expectAsync(result).toBeResolvedTo();
-		expect(db.transaction).toHaveBeenCalledOnceWith(arrayWithExactContents([dbObjectStore]));
-		expect(transaction.objectStore).toHaveBeenCalledOnceWith(dbObjectStore);
-		expect(objectStore.delete).toHaveBeenCalledOnceWith(key);
+		expect(db.transaction).toHaveBeenCalledTimes(1);
+		expect(db.transaction).toHaveBeenCalledWith(arrayWithExactContents([dbObjectStore]));
+		expect(transaction.objectStore).toHaveBeenCalledTimes(1);
+		expect(transaction.objectStore).toHaveBeenCalledWith(dbObjectStore);
+		expect(objectStore.delete).toHaveBeenCalledTimes(1);
+		expect(objectStore.delete).toHaveBeenCalledWith(key);
 	});
 
 	describe('retrieve', () => {
@@ -120,7 +124,8 @@ describe('IndexedDbStorageService', () => {
 			const result = service.retrieve(key);
 
 			await expectAsync(result).toBeResolvedTo(null);
-			expect(objectStore.get).toHaveBeenCalledOnceWith(key);
+			expect(objectStore.get).toHaveBeenCalledTimes(1);
+			expect(objectStore.get).toHaveBeenCalledWith(key);
 		});
 
 		it('should get correct data', async () => {
@@ -146,7 +151,8 @@ describe('IndexedDbStorageService', () => {
 			const result = service.retrieve(key);
 
 			await expectAsync(result).toBeResolvedTo(data);
-			expect(objectStore.get).toHaveBeenCalledOnceWith(key);
+			expect(objectStore.get).toHaveBeenCalledTimes(1);
+			expect(objectStore.get).toHaveBeenCalledWith(key);
 		});
 
 		it('should get NULL due to wrong data', async () => {
@@ -168,8 +174,10 @@ describe('IndexedDbStorageService', () => {
 			const result = service.retrieve(key);
 
 			await expectAsync(result).toBeResolvedTo(null);
-			expect(deleteMethod).toHaveBeenCalledOnceWith(key);
-			expect(objectStore.get).toHaveBeenCalledOnceWith(key);
+			expect(deleteMethod).toHaveBeenCalledTimes(1);
+			expect(deleteMethod).toHaveBeenCalledWith(key);
+			expect(objectStore.get).toHaveBeenCalledTimes(1);
+			expect(objectStore.get).toHaveBeenCalledWith(key);
 		});
 	});
 
@@ -189,7 +197,8 @@ describe('IndexedDbStorageService', () => {
 			const result = service.persist(key, null);
 
 			await expectAsync(result).toBeResolvedTo();
-			expect(deleteMethod).toHaveBeenCalledOnceWith(key);
+			expect(deleteMethod).toHaveBeenCalledTimes(1);
+			expect(deleteMethod).toHaveBeenCalledWith(key);
 		});
 
 		it('should throw an error', async () => {
@@ -209,8 +218,10 @@ describe('IndexedDbStorageService', () => {
 			const result = service.persist(key, data);
 
 			await expectAsync(result).toBeRejected();
-			expect(retrieveMethod).toHaveBeenCalledOnceWith(key);
-			expect(objectStore.put).toHaveBeenCalledOnceWith(serialized);
+			expect(retrieveMethod).toHaveBeenCalledTimes(1);
+			expect(retrieveMethod).toHaveBeenCalledWith(key);
+			expect(objectStore.put).toHaveBeenCalledTimes(1);
+			expect(objectStore.put).toHaveBeenCalledWith(serialized);
 		});
 
 		it('should persist new value', async () => {
@@ -237,9 +248,12 @@ describe('IndexedDbStorageService', () => {
 			const result = service.persist(key, data);
 
 			await expectAsync(result).toBeResolvedTo(undefined);
-			expect(retrieveMethod).toHaveBeenCalledOnceWith(key);
-			expect(objectStore.put).toHaveBeenCalledOnceWith(serialized);
-			expect(db.transaction).toHaveBeenCalledOnceWith(
+			expect(retrieveMethod).toHaveBeenCalledTimes(1);
+			expect(retrieveMethod).toHaveBeenCalledWith(key);
+			expect(objectStore.put).toHaveBeenCalledTimes(1);
+			expect(objectStore.put).toHaveBeenCalledWith(serialized);
+			expect(db.transaction).toHaveBeenCalledTimes(1);
+			expect(db.transaction).toHaveBeenCalledWith(
 				arrayWithExactContents([dbObjectStore]),
 				'readwrite',
 			);
@@ -273,12 +287,15 @@ describe('IndexedDbStorageService', () => {
 			const result = service.persist(key, data);
 
 			await expectAsync(result).toBeResolvedTo(undefined);
-			expect(db.transaction).toHaveBeenCalledOnceWith(
+			expect(db.transaction).toHaveBeenCalledTimes(1);
+			expect(db.transaction).toHaveBeenCalledWith(
 				arrayWithExactContents([dbObjectStore]),
 				'readwrite',
 			);
-			expect(objectStore.put).toHaveBeenCalledOnceWith(serialized);
-			expect(retrieveMethod).toHaveBeenCalledOnceWith(key);
+			expect(objectStore.put).toHaveBeenCalledTimes(1);
+			expect(objectStore.put).toHaveBeenCalledWith(serialized);
+			expect(retrieveMethod).toHaveBeenCalledTimes(1);
+			expect(retrieveMethod).toHaveBeenCalledWith(key);
 		});
 	});
 });
