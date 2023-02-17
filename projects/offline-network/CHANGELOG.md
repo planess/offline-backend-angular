@@ -1,3 +1,9 @@
+# 0.1.1 (02/16/2023)
+
+### Angular
+
+- extended library compatibility with Angular 10.
+
 # 0.1.0 (02/10/2023)
 
 ### Angular
